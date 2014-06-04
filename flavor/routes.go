@@ -33,17 +33,15 @@ func init() {
 func listHandler(res http.ResponseWriter, req *http.Request) {
 	ctx := appengine.NewContext(req)
 
-    var counter int
     flavorChan := make(chan Data)
 
     for location, url := range locations {
-    	counter++
     	go getFlavors(ctx, Data { Location: location, Url: url, }, flavorChan)
     }
 
     flavors := make(map[string][]string)
 
-    for i := 0; i < counter; i++ {
+    for i := 0; i < len(locations); i++ {
     	data := <-flavorChan
 	    flavors[data.Location] = data.Flavors
     }
