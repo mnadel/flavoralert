@@ -10,18 +10,10 @@ import (
 
 const VERSION_0 = "/version/0"
 
+var locations map[string]string
+
 func init() {
-	router := mux.NewRouter()
-
-	router.HandleFunc(VERSION_0 + "/list", listHandler)
-
-	http.Handle("/", router)
-}
-
-func listHandler(res http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
-
-    locations := make(map[string]string)
+    locations = make(map[string]string)
     locations["Uptown"] = "http://www.yogurtlabs.com/locations/uptown/"
     locations["Apple Valley"] = "http://www.yogurtlabs.com/locations/apple-valley/"
     locations["Hopkins"] = "http://www.yogurtlabs.com/locations/hopkins/"
@@ -31,6 +23,15 @@ func listHandler(res http.ResponseWriter, req *http.Request) {
     locations["IDS"] = "http://www.yogurtlabs.com/locations/ids-tower-downtown-mpls/"
     locations["Edina"] = "http://www.yogurtlabs.com/locations/ids-tower-downtown-mpls/"
     locations["Lake Calhoun"] = "http://www.yogurtlabs.com/locations/lake-calhoun/"
+
+	router := mux.NewRouter()
+	router.HandleFunc(VERSION_0 + "/list", listHandler)
+
+	http.Handle("/", router)
+}
+
+func listHandler(res http.ResponseWriter, req *http.Request) {
+	ctx := appengine.NewContext(req)
 
     var counter int
     flavorChan := make(chan Data)
@@ -44,7 +45,7 @@ func listHandler(res http.ResponseWriter, req *http.Request) {
 
     for i := 0; i < counter; i++ {
     	data := <-flavorChan
-    	flavors[data.Location] = data.Flavors
+	    flavors[data.Location] = data.Flavors
     }
 
     emit(ctx, res, flavors, "success")
