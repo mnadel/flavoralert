@@ -1,9 +1,9 @@
 package flavor
 
 import (
-	"net/http"
+    "net/http"
 
-	"github.com/gorilla/mux"
+    "github.com/gorilla/mux"
 
     "appengine"
 )
@@ -24,8 +24,8 @@ func init() {
     locations["Edina"] = "http://www.yogurtlabs.com/locations/ids-tower-downtown-mpls/"
     locations["Lake Calhoun"] = "http://www.yogurtlabs.com/locations/lake-calhoun/"
 
-	router := mux.NewRouter()
-	router.HandleFunc(VERSION_0 + "/list", listHandler)
+    router := mux.NewRouter()
+    router.HandleFunc(VERSION_0 + "/list", listHandler)
 
 	http.Handle("/", router)
 }
