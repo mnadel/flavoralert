@@ -27,11 +27,11 @@ func init() {
     router := mux.NewRouter()
     router.HandleFunc(VERSION_0 + "/list", listHandler)
 
-	http.Handle("/", router)
+    http.Handle("/", router)
 }
 
 func listHandler(res http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req)
+    ctx := appengine.NewContext(req)
 
     flavorChan := make(chan Data)
 
