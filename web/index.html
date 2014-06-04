@@ -1,0 +1,19 @@
+<!doctype html>
+<html ng-app="flavoralert">
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>
+    <script src="/js/main.js"></script>
+  </head>
+<body>
+  <div ng-controller="Flavors">
+    <span ng-repeat="(loc, flavors) in flavors">
+      <h3>{{loc}}</h3>
+      <ul>
+        <li ng-repeat="flavor in flavors">
+          {{flavor}}
+        </li>
+      </ul>
+    </span>
+  </div>
+</body>
+</html>
