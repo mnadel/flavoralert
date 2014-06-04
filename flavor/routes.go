@@ -43,7 +43,7 @@ func listHandler(res http.ResponseWriter, req *http.Request) {
 
     for i := 0; i < len(locations); i++ {
     	data := <-flavorChan
-	    flavors[data.Location] = data.Flavors
+        flavors[data.Location] = data.Flavors
     }
 
     emit(ctx, res, flavors, "success")
