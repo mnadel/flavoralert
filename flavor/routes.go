@@ -25,24 +25,33 @@ func init() {
     locations["Lake Calhoun"] = "http://www.yogurtlabs.com/locations/lake-calhoun/"
 
     router := mux.NewRouter()
-    router.HandleFunc(VERSION_0 + "/list", listHandler)
+    router.HandleFunc(VERSION_0 + "/current", currentHandler)
+    router.HandleFunc(VERSION_0 + "/all", allHandler)
 
     http.Handle("/", router)
 }
 
-func listHandler(res http.ResponseWriter, req *http.Request) {
+func allHandler(res http.ResponseWriter, req *http.Request) {
+    ctx := appengine.NewContext(req)
+
+    flavors := getAllFlavors(ctx)
+
+    emit(ctx, res, flavors, "success")
+}
+
+func currentHandler(res http.ResponseWriter, req *http.Request) {
     ctx := appengine.NewContext(req)
 
     flavorChan := make(chan Data)
 
     for location, url := range locations {
-    	go getFlavors(ctx, Data { Location: location, Url: url, }, flavorChan)
+        go getCurrentFlavors(ctx, Data { Location: location, Url: url, }, flavorChan)
     }
 
     flavors := make(map[string][]string)
 
     for i := 0; i < len(locations); i++ {
-    	data := <-flavorChan
+        data := <-flavorChan
         flavors[data.Location] = data.Flavors
     }
 

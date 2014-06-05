@@ -14,7 +14,31 @@ type Data struct {
     Url string `json:"-"` // ignore
 }
 
-func getFlavors(ctx appengine.Context, data Data, ch chan<- Data) {
+func getAllFlavors(ctx appengine.Context) []string {
+    url := "http://www.yogurtlabs.com/flavors/"
+
+    html, err := fetch(ctx, url)
+    if err != nil {
+        ctx.Errorf("Unable to fetch [%s]: %s", url, err.Error())
+        return nil
+    }
+
+    doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
+    if err != nil {
+        ctx.Errorf("Unable to parse [%s]: %s", url, err.Error())
+        return nil
+    }
+
+    flavors := make([]string, 0)
+
+    doc.Find(".flvName").Each(func(i int, s *goquery.Selection) {
+        flavors = append(flavors, s.Text())
+    })
+
+    return flavors
+}
+
+func getCurrentFlavors(ctx appengine.Context, data Data, ch chan<- Data) {
     html, err := fetch(ctx, data.Url)
     if err != nil {
         ctx.Errorf("Unable to fetch [%s]: %s", data.Url, err.Error())

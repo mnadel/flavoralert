@@ -3,17 +3,38 @@
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js"></script>
     <script src="/js/main.js"></script>
+    <link rel="stylesheet" type="text/css" href="/web/flavor.css">
   </head>
 <body>
-  <div ng-controller="Flavors">
-    <span ng-repeat="(loc, flavors) in flavors">
-      <h3>{{loc}}</h3>
+  <div id="left" ng-controller="CurrentFlavors">
+    <h3>By Location</h3>
+    <span ng-repeat="(loc, flavors) in locs">
+      <span class="header">{{loc}}</span>
       <ul>
         <li ng-repeat="flavor in flavors">
           {{flavor}}
         </li>
       </ul>
     </span>
+  </div>
+  <div id="middle" ng-controller="CurrentFlavors">
+    <h3>By Flavor</h3>
+    <span ng-repeat="(flavor, locs) in flavors">
+      <span class="header">{{flavor}}</span>
+      <ul>
+        <li ng-repeat="loc in locs | orderBy:'toString()'">
+          {{loc}}
+        </li>
+      </ul>
+    </span>
+  </div>
+  <div id="right" ng-controller="AllFlavors">
+    <h3>All Flavors</h3>
+    <ul>
+      <li ng-repeat="flavor in flavors | orderBy:'toString()'">
+        {{flavor}}
+      </li>
+    </ul>
   </div>
 </body>
 </html>
