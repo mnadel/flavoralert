@@ -68,12 +68,8 @@ func alertDeleteHandler(res http.ResponseWriter, req *http.Request) {
         User: usr.String(),
     }
 
-    err := alert.Delete(ctx)
-    if err != nil {
-        emit(ctx, res, err.Error(), "error")
-    } else {
-        emit(ctx, res, nil, "success")
-    }
+    count := alert.Delete(ctx)
+    emit(ctx, res, count, "success")
 }
 
 func alertCreateHandler(res http.ResponseWriter, req *http.Request) {

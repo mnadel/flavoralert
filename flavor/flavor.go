@@ -10,6 +10,10 @@ import (
     "appengine/datastore"
 )
 
+const (
+    AlertEntity = "Alert"
+)
+
 type Alert struct {
     Created time.Time
     Flavor string
@@ -24,7 +28,7 @@ type Data struct {
 }
 
 func (alert *Alert) Create(ctx appengine.Context) error {
-    _, err := datastore.Put(ctx, datastore.NewIncompleteKey(ctx, "alert", nil), alert)
+    _, err := datastore.Put(ctx, datastore.NewIncompleteKey(ctx, AlertEntity, nil), alert)
     if err != nil {
         ctx.Errorf("Error creating alert: %s", err.Error())
         return err
@@ -33,31 +37,33 @@ func (alert *Alert) Create(ctx appengine.Context) error {
     return nil
 }
 
-func (alert *Alert) Delete(ctx appengine.Context) error {
-    q := datastore.NewQuery("alert").
+func (alert *Alert) Delete(ctx appengine.Context) int {
+    q := datastore.NewQuery(AlertEntity).
         Filter("Flavor =", alert.Flavor).
-        Filter("AlertedOn =", 0).
         Filter("User =", alert.User).
+        Filter("AlertedOn =", alert.AlertedOn).
         KeysOnly()
 
-    var matches []datastore.Key
-    _, err := q.GetAll(ctx, &matches)
+    keys, err := q.GetAll(ctx, nil)
     if err != nil {
         ctx.Errorf("Error querying %v: %s", q, err.Error())
-        return err
+        return 0
     }
 
-    var anError error
+    ctx.Debugf("Found %d unsent alerts for %v", len(keys), q)
 
-    for _, key := range matches {
-        err := datastore.Delete(ctx, &key)
+    count := 0
+
+    for _, key := range keys {
+        err := datastore.Delete(ctx, key)
         if err != nil {
             ctx.Errorf("Error deleting %v: %s", key, err.Error())
-            anError = err
+        } else {
+            count += 1
         }
     }
 
-    return anError
+    return count
 }
 
 func getAllFlavors(ctx appengine.Context) []string {
