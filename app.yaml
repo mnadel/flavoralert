@@ -12,3 +12,6 @@ handlers:
   static_dir: web
 - url: /.*
   script: _go_app
+- url: /alert/.*
+  script: _go_app
+  login: required

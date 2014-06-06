@@ -1,11 +1,14 @@
 package flavor
 
 import (
+    "time"
+    "strings"
     "net/http"
 
     "github.com/gorilla/mux"
 
     "appengine"
+    "appengine/user"
 )
 
 const VERSION_0 = "/version/0"
@@ -27,8 +30,46 @@ func init() {
     router := mux.NewRouter()
     router.HandleFunc(VERSION_0 + "/current", currentHandler)
     router.HandleFunc(VERSION_0 + "/all", allHandler)
+    router.HandleFunc(VERSION_0 + "/meta", metaHandler)
+    router.HandleFunc(VERSION_0 + "/alert/{flavor}", alertCreateHandler)
 
     http.Handle("/", router)
+}
+
+func metaHandler(res http.ResponseWriter, req *http.Request) {
+    ctx := appengine.NewContext(req)
+
+    meta := make(map[string]string)
+    meta["login_url"], _ = user.LoginURL(ctx, "/web/index.html")
+    meta["logout_url"], _ = user.LogoutURL(ctx, "/web/index.html")
+    usr := user.Current(ctx); if usr == nil {
+        meta["authenticated"] = "false"
+    } else {
+        meta["authenticated"] = "true"
+    }
+
+    emit(ctx, res, meta, "success")
+}
+
+func alertCreateHandler(res http.ResponseWriter, req *http.Request) {
+    ctx := appengine.NewContext(req)
+    usr := user.Current(ctx)
+
+    vars := mux.Vars(req)
+    flavors := vars["flavors"]
+
+    alert := Alert {
+        Created: time.Now(),
+        Flavors: strings.Split(flavors, ","),
+        User: usr.String(),
+    }
+
+    err := alert.Create(ctx)
+    if err != nil {
+        emit(ctx, res, err.Error(), "error")
+    } else {
+        emit(ctx, res, nil, "success")
+    }
 }
 
 func allHandler(res http.ResponseWriter, req *http.Request) {

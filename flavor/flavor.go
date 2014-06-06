@@ -1,17 +1,36 @@
 package flavor
 
 import (
+    "time"
     "strings"
 
     "github.com/PuerkitoBio/goquery"
 
     "appengine"
+    "appengine/datastore"
 )
+
+type Alert struct {
+    Created time.Time
+    Flavors []string
+    User string
+    AlertedOn time.Time
+}
 
 type Data struct {
     Location string `json:"location"`
     Flavors []string `json:"flavors"`
     Url string `json:"-"` // ignore
+}
+
+func (alert *Alert) Create(ctx appengine.Context) error {
+    _, err := datastore.Put(ctx, datastore.NewIncompleteKey(ctx, "alert", nil), alert)
+    if err != nil {
+        ctx.Errorf("Error creating alert: %s", err.Error())
+        return err
+    }
+
+    return nil
 }
 
 func getAllFlavors(ctx appengine.Context) []string {

@@ -12,6 +12,19 @@ Array.prototype.getUnique = function () {
 
 var app = angular.module("flavoralert", []);
 
+app.controller("Alerting", function ($scope, $http, $location) {
+    $http({
+        method: "GET",
+        url: $location.protocol() + "://" + $location.host() + ":" + $location.port() + "/version/0/meta"
+    }).success(function (resp) {
+        $scope.meta = resp.data;
+    });
+
+    $scope.save = function () {
+        alert("Saving!");
+    }
+});
+
 app.controller("CurrentFlavors", function ($scope, $http, $location) {
     $http({
         method: "GET",
