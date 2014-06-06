@@ -2,7 +2,6 @@ package flavor
 
 import (
     "time"
-    "strings"
     "net/http"
 
     "github.com/gorilla/mux"
@@ -32,7 +31,8 @@ func init() {
     router.HandleFunc(VERSION_0 + "/current", currentHandler)
     router.HandleFunc(VERSION_0 + "/all", allHandler)
     router.HandleFunc(VERSION_0 + "/meta", metaHandler)
-    router.HandleFunc(VERSION_0 + "/alert/{flavor}", alertCreateHandler)
+    router.HandleFunc(VERSION_0 + "/alert/add/{flavor}", alertCreateHandler)
+    router.HandleFunc(VERSION_0 + "/alert/remove/{flavor}", alertDeleteHandler)
 
     http.Handle("/", router)
 }
@@ -56,16 +56,36 @@ func metaHandler(res http.ResponseWriter, req *http.Request) {
     emit(ctx, res, meta, "success")
 }
 
+func alertDeleteHandler(res http.ResponseWriter, req *http.Request) {
+    ctx := appengine.NewContext(req)
+    usr := user.Current(ctx)
+
+    vars := mux.Vars(req)
+    flavor := vars["flavor"]
+
+    alert := Alert {
+        Flavor: flavor,
+        User: usr.String(),
+    }
+
+    err := alert.Delete(ctx)
+    if err != nil {
+        emit(ctx, res, err.Error(), "error")
+    } else {
+        emit(ctx, res, nil, "success")
+    }
+}
+
 func alertCreateHandler(res http.ResponseWriter, req *http.Request) {
     ctx := appengine.NewContext(req)
     usr := user.Current(ctx)
 
     vars := mux.Vars(req)
-    flavors := vars["flavors"]
+    flavor := vars["flavor"]
 
     alert := Alert {
         Created: time.Now(),
-        Flavors: strings.Split(flavors, ","),
+        Flavor: flavor,
         User: usr.String(),
     }
 

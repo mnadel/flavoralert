@@ -12,7 +12,7 @@ import (
 
 type Alert struct {
     Created time.Time
-    Flavors []string
+    Flavor string
     User string
     AlertedOn time.Time
 }
@@ -31,6 +31,33 @@ func (alert *Alert) Create(ctx appengine.Context) error {
     }
 
     return nil
+}
+
+func (alert *Alert) Delete(ctx appengine.Context) error {
+    q := datastore.NewQuery("alert").
+        Filter("Flavor =", alert.Flavor).
+        Filter("AlertedOn =", 0).
+        Filter("User =", alert.User).
+        KeysOnly()
+
+    var matches []datastore.Key
+    _, err := q.GetAll(ctx, &matches)
+    if err != nil {
+        ctx.Errorf("Error querying %v: %s", q, err.Error())
+        return err
+    }
+
+    var anError error
+
+    for _, key := range matches {
+        err := datastore.Delete(ctx, &key)
+        if err != nil {
+            ctx.Errorf("Error deleting %v: %s", key, err.Error())
+            anError = err
+        }
+    }
+
+    return anError
 }
 
 func getAllFlavors(ctx appengine.Context) []string {

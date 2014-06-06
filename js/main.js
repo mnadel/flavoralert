@@ -10,25 +10,45 @@ Array.prototype.getUnique = function () {
    return a;
 }
 
+function CreateUrl(location, paths) {
+    if (!(paths instanceof Array)) {
+        paths = [paths];
+    }
+
+    return location.protocol() + "://" + location.host() + ":" + location.port() + "/" + paths.join("/");
+}
+
 var app = angular.module("flavoralert", []);
 
 app.controller("Alerting", function ($scope, $http, $location) {
     $http({
         method: "GET",
-        url: $location.protocol() + "://" + $location.host() + ":" + $location.port() + "/version/0/meta"
+        url: CreateUrl($location, "version/0/meta")
     }).success(function (resp) {
         $scope.meta = resp.data;
+        $scope.alerts = {};
     });
 
-    $scope.save = function () {
-        //
-    }
+    $scope.save = function (val) {
+        Object.getOwnPropertyNames($scope.alerts).forEach(function (flavor) {
+            var newState = $scope.alerts[flavor];
+            var action = newState ? "add" : "remove";
+
+            $http({
+                method: "POST",
+                url: CreateUrl($location, ["version/0/alert", action, flavor])
+            }).success(function (resp) {
+                $scope.meta = resp.data;
+                $scope.alerts = {};
+            });
+        });
+    };
 });
 
 app.controller("CurrentFlavors", function ($scope, $http, $location) {
     $http({
         method: "GET",
-        url: $location.protocol() + "://" + $location.host() + ":" + $location.port() + "/version/0/current"
+        url: CreateUrl($location, "version/0/current")
     }).success(function (resp) {
         $scope.locs = resp.data;
         $scope.flavors = {};
@@ -48,12 +68,12 @@ app.controller("CurrentFlavors", function ($scope, $http, $location) {
 app.controller("AllFlavors", function ($scope, $http, $location) {
     $http({
         method: "GET",
-        url: $location.protocol() + "://" + $location.host() + ":" + $location.port() + "/version/0/all"
+        url: CreateUrl($location, "version/0/all")
     }).success(function (resp) {
         var validFlavors = function (i) {
             return i != "Unknown" && i != "Coming Soon";
         };
-        
+
         $scope.flavors = resp.data.filter(validFlavors).getUnique();
     });
 });
