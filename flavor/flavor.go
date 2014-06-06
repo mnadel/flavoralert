@@ -37,6 +37,28 @@ func (alert *Alert) Create(ctx appengine.Context) error {
     return nil
 }
 
+func (alert *Alert) List(ctx appengine.Context) map[string]string {
+    q := datastore.NewQuery(AlertEntity).
+        Filter("User =", alert.User)
+
+    var alerts []Alert
+    _, err := q.GetAll(ctx, &alerts)
+    if err != nil {
+        ctx.Errorf("Error querying %v: %s", q, err.Error())
+        return nil
+    }
+
+    ctx.Debugf("Found %d alerts for %v", len(alerts), q)
+
+    data := make(map[string]string)
+
+    for _, alert := range alerts {
+        data[alert.Flavor] = "true"
+    }
+
+    return data
+}
+
 func (alert *Alert) Delete(ctx appengine.Context) int {
     q := datastore.NewQuery(AlertEntity).
         Filter("Flavor =", alert.Flavor).

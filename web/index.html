@@ -39,7 +39,7 @@
       <li ng-repeat="flavor in flavors | orderBy:'toString()'">
         {{flavor}}
         <span ng-controller="Alerting">
-          <input ng-if="meta.authenticated == 'true'" type="checkbox" ng-model="alerts[flavor]" ng-change="save()" ng-true-value="true" ng-false-value="false"/>
+          <input ng-if="meta.authenticated == 'true'" type="checkbox" ng-model="alerts[flavor]" ng-change="save(flavor)" ng-true-value="true" ng-false-value="false"/>
         </span>
       </li>
     </ul>

@@ -29,18 +29,20 @@ app.controller("Alerting", function ($scope, $http, $location) {
         $scope.alerts = {};
     });
 
-    $scope.save = function (val) {
-        Object.getOwnPropertyNames($scope.alerts).forEach(function (flavor) {
-            var newState = $scope.alerts[flavor];
-            var action = newState ? "add" : "remove";
+    $http({
+        method: "GET",
+        url: CreateUrl($location, "version/0/alert/all")
+    }).success(function (resp) {
+        $scope.alerts = resp.data
+    });
 
-            $http({
-                method: "POST",
-                url: CreateUrl($location, ["version/0/alert", action, flavor])
-            }).success(function (resp) {
-                $scope.meta = resp.data;
-                $scope.alerts = {};
-            });
+    $scope.save = function (flavor) {
+        var alert = $scope.alerts[flavor];
+        var action = alert === "true" ? "add" : "remove";
+
+        $http({
+            method: "POST",
+            url: CreateUrl($location, ["version/0/alert", action, flavor])
         });
     };
 });

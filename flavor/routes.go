@@ -31,6 +31,7 @@ func init() {
     router.HandleFunc(VERSION_0 + "/current", currentHandler)
     router.HandleFunc(VERSION_0 + "/all", allHandler)
     router.HandleFunc(VERSION_0 + "/meta", metaHandler)
+    router.HandleFunc(VERSION_0 + "/alert/all", alertListHandler)
     router.HandleFunc(VERSION_0 + "/alert/add/{flavor}", alertCreateHandler)
     router.HandleFunc(VERSION_0 + "/alert/remove/{flavor}", alertDeleteHandler)
 
@@ -54,6 +55,18 @@ func metaHandler(res http.ResponseWriter, req *http.Request) {
     }
 
     emit(ctx, res, meta, "success")
+}
+
+func alertListHandler(res http.ResponseWriter, req *http.Request) {
+    ctx := appengine.NewContext(req)
+    usr := user.Current(ctx)
+
+    alert := Alert {
+        User: usr.String(),
+    }
+
+    alerts := alert.List(ctx)
+    emit(ctx, res, alerts, "success")
 }
 
 func alertDeleteHandler(res http.ResponseWriter, req *http.Request) {
