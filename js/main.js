@@ -21,7 +21,7 @@ app.controller("Alerting", function ($scope, $http, $location) {
     });
 
     $scope.save = function () {
-        alert("Saving!");
+        //
     }
 });
 
@@ -50,6 +50,10 @@ app.controller("AllFlavors", function ($scope, $http, $location) {
         method: "GET",
         url: $location.protocol() + "://" + $location.host() + ":" + $location.port() + "/version/0/all"
     }).success(function (resp) {
-        $scope.flavors = resp.data.getUnique();
+        var validFlavors = function (i) {
+            return i != "Unknown" && i != "Coming Soon";
+        };
+        
+        $scope.flavors = resp.data.filter(validFlavors).getUnique();
     });
 });

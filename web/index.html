@@ -31,7 +31,7 @@
   </div>
   <div id="right" ng-controller="AllFlavors">
     <h3>Set Alerts</h3>
-    <span ng-controller="Alerting">
+    <span ng-controller="Alerting" style="margin-left: 20px;">
       <a ng-if="meta.authenticated == 'false'" href="{{meta.login_url}}">login</a>
       <a ng-if="meta.authenticated == 'true'" href="{{meta.logout_url}}">logout</a>
     </span>

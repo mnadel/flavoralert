@@ -28,12 +28,17 @@ func init() {
     locations["Lake Calhoun"] = "http://www.yogurtlabs.com/locations/lake-calhoun/"
 
     router := mux.NewRouter()
+    router.HandleFunc("/", redirectHandler)
     router.HandleFunc(VERSION_0 + "/current", currentHandler)
     router.HandleFunc(VERSION_0 + "/all", allHandler)
     router.HandleFunc(VERSION_0 + "/meta", metaHandler)
     router.HandleFunc(VERSION_0 + "/alert/{flavor}", alertCreateHandler)
 
     http.Handle("/", router)
+}
+
+func redirectHandler(res http.ResponseWriter, req *http.Request) {
+    http.Redirect(res, req, "/web/index.html", 301)
 }
 
 func metaHandler(res http.ResponseWriter, req *http.Request) {
